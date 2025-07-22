@@ -1,6 +1,9 @@
 spring:
   application:
     name: front-api
+  threads:
+    virtual:
+      enabled: true
 server:
   tomcat:
     threads:

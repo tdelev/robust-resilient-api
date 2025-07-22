@@ -12,17 +12,17 @@ class BasicSimulation : Simulation() {
         .acceptHeader("application/json")
         .userAgentHeader("gatling")
 
-//    val scn = scenario("Front Endpoint Load Test").exec(
-//        http("request")
-//            .get("/api/front")
-//            .check(status().`is`(200))
-//    )
-
     val scn = scenario("Front Endpoint Load Test").exec(
-        http("rate-per-second")
-            .get("/api/front/rate/5")
+        http("timeout")
+            .get("/api/front/timeout/2")
             .check(status().`is`(200))
     )
+
+//    val scn = scenario("Front Endpoint Load Test").exec(
+//        http("rate-per-second")
+//            .get("/api/front/rate/10")
+//            .check(status().`is`(200))
+//    )
 
     init {
         setUp(
