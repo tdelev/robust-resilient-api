@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: front-api
+server:
+  tomcat:
+    threads:
+      max: 10
