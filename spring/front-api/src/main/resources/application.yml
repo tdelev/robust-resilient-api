@@ -3,8 +3,24 @@ spring:
     name: front-api
   threads:
     virtual:
-      enabled: true
+      enabled: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dogs
+    username: dogs
+    password: dogs
+  jpa:
+    open-in-view: false
 server:
   tomcat:
+    mbeanregistry:
+      enabled: true
     threads:
       max: 10
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

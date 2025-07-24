@@ -1,8 +1,16 @@
 package com.sorsix.frontapi
 
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
+import io.github.resilience4j.ratelimiter.RateLimiterConfig
+import io.github.resilience4j.ratelimiter.RateLimiterRegistry
+import jakarta.persistence.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -21,22 +29,109 @@ fun main(args: Array<String>) {
 
 @RestController
 @RequestMapping("/api/front")
-class FrontApiController(restTemplateBuilder: RestTemplateBuilder) {
+class FrontApiController(restTemplateBuilder: RestTemplateBuilder, val repository: DogRepository) {
+
+    val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     val restTemplate: RestTemplate = restTemplateBuilder
-        .readTimeout(Duration.ofSeconds(5))
+//        .readTimeout(Duration.ofSeconds(5))
         .build()
     val UPSTREAM_URL = "http://localhost:8081/api/upstream"
 
     @GetMapping("/timeout/{probability}")
     fun timeout(@PathVariable probability: Int): Map<String, Any> {
-        val upstream = restTemplate.getForObject<String>("$UPSTREAM_URL/timeout/$probability")
+        logger.info("Timeout [{}]", probability)
+        val upstream = try {
+            restTemplate.getForObject<String>("$UPSTREAM_URL/timeout/$probability")
+        } catch (e: Exception) {
+            logger.warn("Error accessing upstream [{}]", e.message, e)
+            "timeout"
+        }
         return mapOf("time" to LocalDateTime.now(), "upstream" to upstream)
     }
 
     @GetMapping("/rate/{rate}")
     fun ratePerSecond(@PathVariable rate: Int): Map<String, Any> {
-        val upstream = restTemplate.getForObject<String>("$UPSTREAM_URL/per-second/$rate")
+        logger.info("Rate per second [{}]r/s", rate)
+        val upstream = try {
+            rateLimiter.executeCallable {
+                restTemplate.getForObject<String>("$UPSTREAM_URL/per-second/$rate")
+            }
+        } catch (e: Exception) {
+            logger.warn("Error accessing upstream [{}]", e.message, e)
+            "rate-error"
+        }
         return mapOf("time" to LocalDateTime.now(), "upstream" to upstream)
     }
+
+    @GetMapping("/timeout/{probability}/db")
+    fun timeoutWithDb(@PathVariable probability: Int): Map<String, Any> {
+        logger.info("Timeout with db [{}]", probability)
+        val dogs = repository.findAll()
+        val upstream = try {
+            restTemplate.getForObject<String>("$UPSTREAM_URL/timeout/$probability")
+        } catch (e: Exception) {
+            logger.warn("Error accessing upstream [{}]", e.message, e)
+            "timeout-error"
+        }
+        return mapOf("time" to LocalDateTime.now(), "upstream" to upstream, "dogs" to dogs)
+    }
+
+    @GetMapping("/error/{rate}")
+    fun errorRate(@PathVariable rate: Int): Map<String, Any> {
+        logger.info("Error rate [{}]", rate)
+        val upstream = try {
+            circuitBreaker.executeCallable {
+                restTemplate.getForObject<String>("$UPSTREAM_URL/error/$rate")
+            }
+        } catch (e: Exception) {
+            logger.warn("Error accessing upstream [{}]", e.message, e)
+            "rate-error"
+        }
+        return mapOf("time" to LocalDateTime.now(), "upstream" to upstream)
+    }
+
+    @GetMapping("/dogs")
+    fun getDogs(): List<Dog> = repository.findAll()
+
+    val config = RateLimiterConfig.custom()
+        .timeoutDuration(Duration.ofSeconds(1))
+        .limitRefreshPeriod(Duration.ofSeconds(1))
+        .limitForPeriod(5)
+        .build()
+
+    val rateLimiterRegistry = RateLimiterRegistry.of(config)
+
+    val rateLimiter = rateLimiterRegistry.rateLimiter("5_request_per_second")
+
+    /**
+     * Real world examples:
+     *
+     * - email service which might be slow or unavailable
+     *
+     */
+    val circuitBreakerConfig = CircuitBreakerConfig.custom()
+        .failureRateThreshold(50f)
+        .waitDurationInOpenState(Duration.ofSeconds(10))
+        .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
+        .slidingWindowSize(4)
+        .slowCallDurationThreshold(Duration.ofMillis(250))
+        .build()
+
+    val circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig)
+
+    val circuitBreaker = circuitBreakerRegistry.circuitBreaker("circuit_breaker")
+
 }
+
+@Entity
+@Table(name = "dogs")
+data class Dog(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
+    val name: String = "",
+)
+
+interface DogRepository : JpaRepository<Dog, Long>
+
