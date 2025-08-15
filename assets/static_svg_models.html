@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static SVG Concurrency Models</title>
+    <style>
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .svg-container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .model-title {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1e293b;
+        }
+        
+        .download-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 10px 0;
+            transition: all 0.2s;
+        }
+        
+        .download-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .tech-stack {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; font-size: 48px; margin-bottom: 50px; color: #1e293b;">
+            📊 Concurrency Models - Static SVGs
+        </h1>
+        
+        <!-- Thread-per-Request Model SVG -->
+        <div class="svg-container">
+            <div class="model-title">🧵 Thread-per-Request Model</div>
+            <div class="tech-stack">Java Spring Boot • Traditional ASP.NET • Rails (Puma)</div>
+            <button class="download-btn" onclick="downloadSVG('thread-svg', 'thread-per-request-model.svg')">
+                📥 Download SVG
+            </button>
+            
+            <svg id="thread-svg" viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background -->
+                <rect width="1000" height="400" fill="#ffffff"/>
+                
+                <!-- Title -->
+                <text x="500" y="30" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="24" font-weight="bold" fill="#1e293b">Thread-per-Request Concurrency Model</text>
+                
+                <!-- Client Section -->
+                <g id="client-section">
+                    <!-- Client icon -->
+                    <rect x="50" y="100" width="80" height="80" rx="12" fill="#06b6d4"/>
+                    <text x="90" y="145" text-anchor="middle" font-size="32" fill="white">👥</text>
+                    <text x="90" y="200" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#1e293b">Clients</text>
+                    
+                    <!-- Requests -->
+                    <rect x="40" y="220" width="70" height="25" rx="12" fill="#f59e0b"/>
+                    <text x="75" y="237" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" font-weight="600" fill="white">Request 1</text>
+                    
+                    <rect x="40" y="250" width="70" height="25" rx="12" fill="#f59e0b"/>
+                    <text x="75" y="267" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" font-weight="600" fill="white">Request 2</text>
+                    
+                    <rect x="40" y="280" width="70" height="25" rx="12" fill="#f59e0b"/>
+                    <text x="75" y="297" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" font-weight="600" fill="white">Request 3</text>
+                    
+                    <rect x="40" y="310" width="70" height="25" rx="12" fill="#f59e0b"/>
+                    <text x="75" y="327" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" font-weight="600" fill="white">Request 4</text>
+                </g>
+                
+                <!-- Arrow 1 -->
+                <path d="M 150 240 L 200 240" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                <text x="175" y="235" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="20" fill="#64748b">→</text>
+                
+                <!-- Server Section -->
+                <g id="server-section">
+                    <!-- Server icon -->
+                    <rect x="220" y="80" width="100" height="100" rx="16" fill="#7c3aed"/>
+                    <text x="270" y="140" text-anchor="middle" font-size="40" fill="white">🖥️</text>
+                    <text x="270" y="200" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#1e293b">Web Server</text>
+                    
+                    <!-- Thread Pool Label -->
+                    <text x="270" y="225" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="16" font-weight="600" fill="#1e293b">Thread Pool</text>
+                    
+                    <!-- Thread Pool -->
+                    <g id="thread-pool">
+                        <!-- Thread 1 -->
+                        <rect x="220" y="240" width="90" height="45" rx="8" fill="#ef4444"/>
+                        <text x="265" y="260" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" font-weight="600" fill="white">Thread 1</text>
+                        <text x="265" y="275" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" fill="white">Processing</text>
+                        
+                        <!-- Thread 2 -->
+                        <rect x="320" y="240" width="90" height="45" rx="8" fill="#ef4444"/>
+                        <text x="365" y="260" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" font-weight="600" fill="white">Thread 2</text>
+                        <text x="365" y="275" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" fill="white">Processing</text>
+                        
+                        <!-- Thread 3 -->
+                        <rect x="420" y="240" width="90" height="45" rx="8" fill="#6b7280"/>
+                        <text x="465" y="260" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" font-weight="600" fill="white">Thread 3</text>
+                        <text x="465" y="275" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" fill="white">Waiting DB</text>
+                        
+                        <!-- Thread 4 -->
+                        <rect x="520" y="240" width="90" height="45" rx="8" fill="#10b981"/>
+                        <text x="565" y="260" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" font-weight="600" fill="white">Thread 4</text>
+                        <text x="565" y="275" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" fill="white">Available</text>
+                        
+                        <!-- Thread 5 -->
+                        <rect x="220" y="295" width="90" height="45" rx="8" fill="#10b981"/>
+                        <text x="265" y="315" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" font-weight="600" fill="white">Thread 5</text>
+                        <text x="265" y="330" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" fill="white">Available</text>
+                        
+                        <!-- Thread 6 -->
+                        <rect x="320" y="295" width="90" height="45" rx="8" fill="#10b981"/>
+                        <text x="365" y="315" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" font-weight="600" fill="white">Thread 6</text>
+                        <text x="365" y="330" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" fill="white">Available</text>
+                    </g>
+                </g>
+                
+                <!-- Arrow 2 -->
+                <path d="M 630 280 L 680 280" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                <text x="655" y="275" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="20" fill="#64748b">→</text>
+                
+                <!-- Database Section -->
+                <g id="database-section">
+                    <rect x="700" y="100" width="80" height="80" rx="12" fill="#10b981"/>
+                    <text x="740" y="145" text-anchor="middle" font-size="32" fill="white">💾</text>
+                    <text x="740" y="200" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#1e293b">Database</text>
+                    
+                    <text x="740" y="230" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" fill="#64748b">Blocking I/O</text>
+                    <text x="740" y="245" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" fill="#64748b">Thread waits</text>
+                </g>
+                
+                <!-- Stats -->
+                <g id="stats">
+                    <rect x="50" y="360" width="900" height="1" fill="#e2e8f0"/>
+                    
+                    <text x="150" y="385" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#3b82f6">~200 Max Concurrent</text>
+                    <text x="350" y="385" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#ef4444">1-2MB per Thread</text>
+                    <text x="550" y="385" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#f59e0b">High Context Switching</text>
+                    <text x="750" y="385" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#10b981">Good for CPU Tasks</text>
+                </g>
+                
+                <!-- Arrow marker definition -->
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+        
+        <!-- Process-per-Request Model SVG -->
+        <div class="svg-container">
+            <div class="model-title">⚙️ Process-per-Request Model</div>
+            <div class="tech-stack">PHP • Traditional CGI • Some Python deployments</div>
+            <button class="download-btn" onclick="downloadSVG('process-svg', 'process-per-request-model.svg')">
+                📥 Download SVG
+            </button>
+            
+            <svg id="process-svg" viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background -->
+                <rect width="1000" height="400" fill="#ffffff"/>
+                
+                <!-- Title -->
+                <text x="500" y="30" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="24" font-weight="bold" fill="#1e293b">Process-per-Request Concurrency Model</text>
+                
+                <!-- Client Section -->
+                <g id="client-section">
+                    <rect x="50" y="100" width="80" height="80" rx="12" fill="#06b6d4"/>
+                    <text x="90" y="145" text-anchor="middle" font-size="32" fill="white">👥</text>
+                    <text x="90" y="200" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#1e293b">Clients</text>
+                    
+                    <!-- Requests -->
+                    <rect x="40" y="230" width="70" height="25" rx="12" fill="#f59e0b"/>
+                    <text x="75" y="247" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" font-weight="600" fill="white">Request 1</text>
+                    
+                    <rect x="40" y="260" width="70" height="25" rx="12" fill="#f59e0b"/>
+                    <text x="75" y="277" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" font-weight="600" fill="white">Request 2</text>
+                    
+                    <rect x="40" y="290" width="70" height="25" rx="12" fill="#f59e0b"/>
+                    <text x="75" y="307" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" font-weight="600" fill="white">Request 3</text>
+                </g>
+                
+                <!-- Arrow 1 -->
+                <text x="175" y="250" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="20" fill="#64748b">→</text>
+                
+                <!-- Server Section -->
+                <g id="server-section">
+                    <rect x="220" y="80" width="100" height="100" rx="16" fill="#7c3aed"/>
+                    <text x="270" y="140" text-anchor="middle" font-size="40" fill="white">🖥️</text>
+                    <text x="270" y="200" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#1e293b">Web Server</text>
+                    
+                    <text x="270" y="225" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="16" font-weight="600" fill="#1e293b">Process Pool</text>
+                    
+                    <!-- Process Pool -->
+                    <g id="process-pool">
+                        <!-- Process 1 -->
+                        <rect x="200" y="240" width="120" height="60" rx="12" fill="#8b5cf6"/>
+                        <text x="260" y="265" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="white">Process 1</text>
+                        <text x="260" y="280" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" fill="white">Isolated Memory</text>
+                        <text x="260" y="293" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" fill="#e2e8f0">Processing Request</text>
+                        
+                        <!-- Process 2 -->
+                        <rect x="340" y="240" width="120" height="60" rx="12" fill="#f59e0b"/>
+                        <text x="400" y="265" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="white">Process 2</text>
+                        <text x="400" y="280" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" fill="white">Isolated Memory</text>
+                        <text x="400" y="293" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" fill="white">Busy</text>
+                        
+                        <!-- Process 3 -->
+                        <rect x="480" y="240" width="120" height="60" rx="12" fill="#10b981"/>
+                        <text x="540" y="265" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="white">Process 3</text>
+                        <text x="540" y="280" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" fill="white">Isolated Memory</text>
+                        <text x="540" y="293" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" fill="white">Available</text>
+                        
+                        <!-- Process 4 -->
+                        <rect x="200" y="310" width="120" height="60" rx="12" fill="#10b981"/>
+                        <text x="260" y="335" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="white">Process 4</text>
+                        <text x="260" y="350" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" fill="white">Isolated Memory</text>
+                        <text x="260" y="363" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" fill="white">Available</text>
+                    </g>
+                </g>
+                
+                <!-- Arrow 2 -->
+                <text x="655" y="285" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="20" fill="#64748b">→</text>
+                
+                <!-- Database Section -->
+                <g id="database-section">
+                    <rect x="700" y="100" width="80" height="80" rx="12" fill="#10b981"/>
+                    <text x="740" y="145" text-anchor="middle" font-size="32" fill="white">💾</text>
+                    <text x="740" y="200" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#1e293b">Database</text>
+                    
+                    <text x="740" y="230" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" fill="#64748b">Blocking I/O</text>
+                    <text x="740" y="245" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" fill="#64748b">Process waits</text>
+                </g>
+                
+                <!-- Stats -->
+                <g id="stats">
+                    <rect x="50" y="380" width="900" height="1" fill="#e2e8f0"/>
+                    <text x="150" y="395" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#3b82f6">~50 Max Concurrent</text>
+                    <text x="350" y="395" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#ef4444">20-50MB per Process</text>
+                    <text x="550" y="395" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#10b981">Complete Isolation</text>
+                    <text x="750" y="395" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#f59e0b">Slow Creation</text>
+                </g>
+            </svg>
+        </div>
+        
+        <!-- Event Loop Model SVG -->
+        <div class="svg-container">
+            <div class="model-title">🔄 Event Loop Model</div>
+            <div class="tech-stack">Node.js • Python AsyncIO • JavaScript Runtime</div>
+            <button class="download-btn" onclick="downloadSVG('event-svg', 'event-loop-model.svg')">
+                📥 Download SVG
+            </button>
+            
+            <svg id="event-svg" viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background -->
+                <rect width="1000" height="400" fill="#ffffff"/>
+                
+                <!-- Title -->
+                <text x="500" y="30" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="24" font-weight="bold" fill="#1e293b">Event Loop Concurrency Model</text>
+                
+                <!-- Client Section -->
+                <g id="client-section">
+                    <rect x="50" y="80" width="80" height="80" rx="12" fill="#06b6d4"/>
+                    <text x="90" y="125" text-anchor="middle" font-size="32" fill="white">👥</text>
+                    <text x="90" y="180" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#1e293b">Clients</text>
+                    
+                    <!-- Many Requests -->
+                    <rect x="30" y="200" width="50" height="20" rx="10" fill="#f59e0b"/>
+                    <text x="55" y="213" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">Req 1</text>
+                    
+                    <rect x="85" y="200" width="50" height="20" rx="10" fill="#f59e0b"/>
+                    <text x="110" y="213" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">Req 2</text>
+                    
+                    <rect x="30" y="225" width="50" height="20" rx="10" fill="#f59e0b"/>
+                    <text x="55" y="238" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">Req 3</text>
+                    
+                    <rect x="85" y="225" width="50" height="20" rx="10" fill="#f59e0b"/>
+                    <text x="110" y="238" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">Req 4</text>
+                    
+                    <rect x="30" y="250" width="50" height="20" rx="10" fill="#f59e0b"/>
+                    <text x="55" y="263" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">Req 5</text>
+                    
+                    <rect x="85" y="250" width="50" height="20" rx="10" fill="#f59e0b"/>
+                    <text x="110" y="263" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">...</text>
+                </g>
+                
+                <!-- Arrow 1 -->
+                <text x="175" y="200" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="20" fill="#64748b">→</text>
+                
+                <!-- Server Section -->
+                <g id="server-section">
+                    <rect x="220" y="60" width="100" height="100" rx="16" fill="#7c3aed"/>
+                    <text x="270" y="120" text-anchor="middle" font-size="40" fill="white">🖥️</text>
+                    <text x="270" y="180" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#1e293b">Web Server</text>
+                    
+                    <!-- Event Loop -->
+                    <circle cx="270" cy="240" r="60" fill="#06b6d4"/>
+                    <text x="270" y="235" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="white">Event</text>
+                    <text x="270" y="250" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="white">Loop</text>
+                    <text x="270" y="265" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="11" fill="white">Single Thread</text>
+                    
+                    <!-- Rotating arrows around event loop -->
+                    <path d="M 270 180 A 60 60 0 0 1 330 240" stroke="white" stroke-width="2" fill="none" marker-end="url(#whitearrow)"/>
+                    <path d="M 330 240 A 60 60 0 0 1 270 300" stroke="white" stroke-width="2" fill="none" marker-end="url(#whitearrow)"/>
+                    <path d="M 270 300 A 60 60 0 0 1 210 240" stroke="white" stroke-width="2" fill="none" marker-end="url(#whitearrow)"/>
+                    <path d="M 210 240 A 60 60 0 0 1 270 180" stroke="white" stroke-width="2" fill="none" marker-end="url(#whitearrow)"/>
+                    
+                    <!-- Event Queue -->
+                    <text x="450" y="210" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#1e293b">Event Queue</text>
+                    
+                    <rect x="380" y="220" width="60" height="25" rx="6" fill="#10b981"/>
+                    <text x="410" y="237" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">DB Query</text>
+                    
+                    <rect x="450" y="220" width="60" height="25" rx="6" fill="#10b981"/>
+                    <text x="480" y="237" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">File Read</text>
+                    
+                    <rect x="520" y="220" width="60" height="25" rx="6" fill="#10b981"/>
+                    <text x="550" y="237" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">HTTP Call</text>
+                    
+                    <rect x="380" y="250" width="60" height="25" rx="6" fill="#10b981"/>
+                    <text x="410" y="267" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">Timer</text>
+                    
+                    <rect x="450" y="250" width="60" height="25" rx="6" fill="#10b981"/>
+                    <text x="480" y="267" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">Callback</text>
+                    
+                    <rect x="520" y="250" width="60" height="25" rx="6" fill="#10b981"/>
+                    <text x="550" y="267" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="10" font-weight="600" fill="white">Promise</text>
+                </g>
+                
+                <!-- Arrow 2 -->
+                <text x="655" y="240" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="20" fill="#64748b">→</text>
+                
+                <!-- Database Section -->
+                <g id="database-section">
+                    <rect x="700" y="80" width="80" height="80" rx="12" fill="#10b981"/>
+                    <text x="740" y="125" text-anchor="middle" font-size="32" fill="white">💾</text>
+                    <text x="740" y="180" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#1e293b">Database</text>
+                    
+                    <text x="740" y="210" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" fill="#64748b">Non-blocking I/O</text>
+                    <text x="740" y="225" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="12" fill="#64748b">Callbacks/Promises</text>
+                </g>
+                
+                <!-- Stats -->
+                <g id="stats">
+                    <rect x="50" y="320" width="900" height="1" fill="#e2e8f0"/>
+                    <text x="150" y="345" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#3b82f6">10,000+ Max Concurrent</text>
+                    <text x="350" y="345" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#10b981">10-50MB Total Memory</text>
+                    <text x="550" y="345" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#06b6d4">1 CPU Core Used</text>
+                    <text x="750" y="345" text-anchor="middle" font-family="SF Pro Display, sans-serif" font-size="14" font-weight="600" fill="#f59e0b">Poor for CPU Tasks</text>
+                </g>
+                
+                <!-- Arrow marker definitions -->
+                <defs>
+                    <marker id="whitearrow" markerWidth="6" markerHeight="4" refX="0" refY="2" orient="auto">
+                        <polygon points="0 0, 6 2, 0 4" fill="white"/>
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+        
+        <div style="text-align: center; margin: 50px 0; color: #64748b;">
+            <p>Right-click on any SVG and "Save as..." to download individual diagrams for your presentation</p>
+            <p>Or use the download buttons to save optimized SVG files</p>
+        </div>
+    </div>
+
+    <script>
+        function downloadSVG(svgId, filename) {
+            const svg = document.getElementById(svgId);
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            const downloadLink = document.createElement("a");
+            downloadLink.href = svgUrl;
+            downloadLink.download = filename;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(svgUrl);
+        }
+    </script>
+</body>
+</html>
