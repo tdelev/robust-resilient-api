@@ -21,41 +21,42 @@ import java.time.Duration
 import java.time.LocalDateTime
 
 @SpringBootApplication
-class FrontApiApplication
+class WebApiApplication
 
 fun main(args: Array<String>) {
-    runApplication<FrontApiApplication>(*args)
+    runApplication<WebApiApplication>(*args)
 }
 
 @RestController
-@RequestMapping("/api/front")
-class FrontApiController(restTemplateBuilder: RestTemplateBuilder, val repository: DogRepository) {
+@RequestMapping("/api/web")
+class WebApiController(restTemplateBuilder: RestTemplateBuilder, val repository: DogRepository) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     val restTemplate: RestTemplate = restTemplateBuilder
 //        .readTimeout(Duration.ofSeconds(5))
         .build()
-    val UPSTREAM_URL = "http://localhost:8081/api/upstream"
+
+    val EXTERNAL_API_URL = "http://localhost:8081/api/external"
 
     @GetMapping("/timeout/{probability}")
     fun timeout(@PathVariable probability: Int): Map<String, Any> {
         logger.info("Timeout [{}]", probability)
-        val upstream = try {
-            restTemplate.getForObject<String>("$UPSTREAM_URL/timeout/$probability")
+        val external = try {
+            restTemplate.getForObject<String>("$EXTERNAL_API_URL/timeout/$probability")
         } catch (e: Exception) {
             logger.warn("Error accessing upstream [{}]", e.message, e)
             "timeout"
         }
-        return mapOf("time" to LocalDateTime.now(), "upstream" to upstream)
+        return mapOf("time" to LocalDateTime.now(), "external" to external)
     }
 
-    @GetMapping("/rate/{rate}")
-    fun ratePerSecond(@PathVariable rate: Int): Map<String, Any> {
+    @GetMapping("/rate-limit/{rate}")
+    fun rateLimit(@PathVariable rate: Int): Map<String, Any> {
         logger.info("Rate per second [{}]r/s", rate)
         val upstream = try {
             rateLimiter.executeCallable {
-                restTemplate.getForObject<String>("$UPSTREAM_URL/per-second/$rate")
+                restTemplate.getForObject<String>("$EXTERNAL_API_URL/rate-limit/$rate")
             }
         } catch (e: Exception) {
             logger.warn("Error accessing upstream [{}]", e.message, e)
@@ -69,7 +70,7 @@ class FrontApiController(restTemplateBuilder: RestTemplateBuilder, val repositor
         logger.info("Timeout with db [{}]", probability)
         val dogs = repository.findAll()
         val upstream = try {
-            restTemplate.getForObject<String>("$UPSTREAM_URL/timeout/$probability")
+            restTemplate.getForObject<String>("$EXTERNAL_API_URL/timeout/$probability")
         } catch (e: Exception) {
             logger.warn("Error accessing upstream [{}]", e.message, e)
             "timeout-error"
@@ -82,7 +83,7 @@ class FrontApiController(restTemplateBuilder: RestTemplateBuilder, val repositor
         logger.info("Error rate [{}]", rate)
         val upstream = try {
             circuitBreaker.executeCallable {
-                restTemplate.getForObject<String>("$UPSTREAM_URL/error/$rate")
+                restTemplate.getForObject<String>("$EXTERNAL_API_URL/error/$rate")
             }
         } catch (e: Exception) {
             logger.warn("Error accessing upstream [{}]", e.message, e)
@@ -134,4 +135,3 @@ data class Dog(
 )
 
 interface DogRepository : JpaRepository<Dog, Long>
-

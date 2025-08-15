@@ -28,8 +28,11 @@ class ExternalApiController {
     val random = Random()
     val logger = LoggerFactory.getLogger(ExternalApiController::class.java)
 
+    /**
+     * {probability} in range of 0-100
+     */
     @GetMapping("/timeout/{probability}")
-    fun timeoutProbability(@PathVariable probability: Int): String {
+    fun timeout(@PathVariable probability: Int): String {
         val waitTime = if (Math.random() < probability / 100.0) {
             logger.info("Timeout")
             30_000
@@ -40,8 +43,11 @@ class ExternalApiController {
         return "waited: $waitTime"
     }
 
-    @GetMapping("/per-second/{rate}")
-    fun perSecond(@PathVariable rate: Int): String {
+    /**
+     * {rate} Rate of requests per second
+     */
+    @GetMapping("/rate-limit/{rate}")
+    fun rateLimit(@PathVariable rate: Int): String {
         val result = executor.submit(
             Callable {
                 Thread.sleep(1000 / rate.toLong())
@@ -52,16 +58,20 @@ class ExternalApiController {
         return "result: ${result.get()}"
     }
 
+    /**
+     * {rate} from 0-100 means at what second from the minute the API will return error.
+     * Ex. 25% means, the first 15 seconds of each minute the API will return error.
+     */
     @GetMapping("/error/{rate}")
-    fun withError(@PathVariable rate: Int): ResponseEntity<String> {
+    fun error(@PathVariable rate: Int): ResponseEntity<String> {
         val errorTime = (rate * 60) / 100
         val second = LocalDateTime.now().second
+        Thread.sleep(500 + (Math.random() * 500).toLong())
         return if (second < errorTime) {
             logger.warn("Generating error [{}] second", second)
-            Thread.sleep((Math.random() * 10_000).toLong())
             ResponseEntity.internalServerError().build()
         } else {
-            ResponseEntity.ok(LocalDateTime.now().second.toString())
+            ResponseEntity.ok(second.toString())
         }
     }
 
