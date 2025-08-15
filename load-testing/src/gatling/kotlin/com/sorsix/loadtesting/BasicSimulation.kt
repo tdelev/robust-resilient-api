@@ -13,17 +13,17 @@ class BasicSimulation : Simulation() {
         .userAgentHeader("gatling")
     val API_URL = "/api/web"
 
-    val scn = scenario("Timeout with 5% chance").exec(
-        http("timeout")
-            .get("$API_URL/timeout/5")
-            .check(status().`is`(200))
-    )
-
-//    val scn = scenario("Timeout with DB queries").exec(
+//    val scn = scenario("Timeout with 5% chance").exec(
 //        http("timeout")
-//            .get("$API_URL/timeout/5/db")
+//            .get("$API_URL/timeout/0")
 //            .check(status().`is`(200))
 //    )
+
+    val scn = scenario("Timeout with DB queries").exec(
+        http("timeout")
+            .get("$API_URL/timeout/10/db")
+            .check(status().`is`(200))
+    )
 
 //    val scn = scenario("Front Endpoint Load Test").exec(
 //        http("rate-per-second")
