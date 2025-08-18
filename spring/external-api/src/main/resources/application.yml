@@ -1,5 +1,5 @@
 spring:
   application:
-    name: upstream-api
+    name: external-api
 server:
   port: 8081

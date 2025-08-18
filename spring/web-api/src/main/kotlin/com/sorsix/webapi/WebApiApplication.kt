@@ -11,6 +11,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -29,11 +32,16 @@ fun main(args: Array<String>) {
 
 @RestController
 @RequestMapping("/api/web")
-class WebApiController(restTemplateBuilder: RestTemplateBuilder, val repository: DogRepository) {
+class WebApiController(
+    restTemplateBuilder: RestTemplateBuilder,
+    val repository: DogRepository,
+    val transactionTemplate: TransactionTemplate,
+) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     val restTemplate: RestTemplate = restTemplateBuilder
+//        .connectTimeout(Duration.ofSeconds(10))
 //        .readTimeout(Duration.ofSeconds(5))
         .build()
 
@@ -45,51 +53,66 @@ class WebApiController(restTemplateBuilder: RestTemplateBuilder, val repository:
         val external = try {
             restTemplate.getForObject<String>("$EXTERNAL_API_URL/timeout/$probability")
         } catch (e: Exception) {
-            logger.warn("Error accessing upstream [{}]", e.message, e)
+            logger.warn("Error accessing external API [{}]", e.message, e)
             "timeout"
         }
         return mapOf("time" to LocalDateTime.now(), "external" to external)
     }
 
     @GetMapping("/rate-limit/{rate}")
-    fun rateLimit(@PathVariable rate: Int): Map<String, Any> {
+    fun rateLimit(@PathVariable rate: Int): ResponseEntity<*> {
         logger.info("Rate per second [{}]r/s", rate)
-        val upstream = try {
+        val external = try {
             rateLimiter.executeCallable {
                 restTemplate.getForObject<String>("$EXTERNAL_API_URL/rate-limit/$rate")
             }
         } catch (e: Exception) {
-            logger.warn("Error accessing upstream [{}]", e.message, e)
-            "rate-error"
+            logger.warn("Error accessing external API [{}]", e.message, e)
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("rate-error")
         }
-        return mapOf("time" to LocalDateTime.now(), "upstream" to upstream)
+        return ResponseEntity.ok(mapOf("time" to LocalDateTime.now(), "external" to external))
     }
 
     @GetMapping("/timeout/{probability}/db")
     fun timeoutWithDb(@PathVariable probability: Int): Map<String, Any> {
-        logger.info("Timeout with db [{}]", probability)
+        logger.info("Timeout with DB read [{}]", probability)
         val dogs = repository.findAll()
-        val upstream = try {
+        val external = try {
             restTemplate.getForObject<String>("$EXTERNAL_API_URL/timeout/$probability")
         } catch (e: Exception) {
-            logger.warn("Error accessing upstream [{}]", e.message, e)
+            logger.warn("Error accessing external API [{}]", e.message, e)
             "timeout-error"
         }
-        return mapOf("time" to LocalDateTime.now(), "upstream" to upstream, "dogs" to dogs)
+        return mapOf("time" to LocalDateTime.now(), "external" to external, "dogs" to dogs)
+    }
+
+    @GetMapping("/timeout/{probability}/db_transaction")
+    fun timeoutWithDbTransaction(@PathVariable probability: Int): Map<String, Any?> {
+        logger.info("Timeout with DB transaction [{}]", probability)
+        val dog = try {
+            transactionTemplate.execute {
+                val dogName = restTemplate.getForObject<String>("$EXTERNAL_API_URL/timeout/$probability")
+                repository.save(Dog(name = dogName))
+            }
+        } catch (e: Exception) {
+            logger.warn("Error accessing external API [{}]", e.message, e)
+            "timeout-error"
+        }
+        return mapOf("time" to LocalDateTime.now(), "dog" to dog)
     }
 
     @GetMapping("/error/{rate}")
-    fun errorRate(@PathVariable rate: Int): Map<String, Any> {
+    fun errorRate(@PathVariable rate: Int): ResponseEntity<*> {
         logger.info("Error rate [{}]", rate)
-        val upstream = try {
-            circuitBreaker.executeCallable {
-                restTemplate.getForObject<String>("$EXTERNAL_API_URL/error/$rate")
-            }
+        val external = try {
+//            circuitBreaker.executeCallable {
+                expensiveCallThatCanFail(rate)
+//            }
         } catch (e: Exception) {
-            logger.warn("Error accessing upstream [{}]", e.message, e)
-            "rate-error"
+            logger.warn("Error accessing external API [{}]", e.message, e)
+            return ResponseEntity.internalServerError().body("external-error: ${e.message}")
         }
-        return mapOf("time" to LocalDateTime.now(), "upstream" to upstream)
+        return ResponseEntity.ok(mapOf("time" to LocalDateTime.now(), "external" to external))
     }
 
     @GetMapping("/dogs")
@@ -113,15 +136,36 @@ class WebApiController(restTemplateBuilder: RestTemplateBuilder, val repository:
      */
     val circuitBreakerConfig = CircuitBreakerConfig.custom()
         .failureRateThreshold(50f)
-        .waitDurationInOpenState(Duration.ofSeconds(10))
+        .waitDurationInOpenState(Duration.ofSeconds(5))
         .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
         .slidingWindowSize(4)
-        .slowCallDurationThreshold(Duration.ofMillis(250))
+        .slowCallDurationThreshold(Duration.ofMillis(1000))
         .build()
 
     val circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig)
 
     val circuitBreaker = circuitBreakerRegistry.circuitBreaker("circuit_breaker")
+
+    private fun expensiveCallThatCanFail(rate: Int): String {
+        matrixMultiply(500)
+        return restTemplate.getForObject<String>("$EXTERNAL_API_URL/error/$rate")
+    }
+
+    // CPU-intensive matrix multiplication
+    fun matrixMultiply(size: Int): Array<IntArray> {
+        val a = Array(size) { IntArray(size) { (1..100).random() } }
+        val b = Array(size) { IntArray(size) { (1..100).random() } }
+        val result = Array(size) { IntArray(size) }
+
+        for (i in 0 until size) {
+            for (j in 0 until size) {
+                for (k in 0 until size) {
+                    result[i][j] += a[i][k] * b[k][j]
+                }
+            }
+        }
+        return result
+    }
 
 }
 

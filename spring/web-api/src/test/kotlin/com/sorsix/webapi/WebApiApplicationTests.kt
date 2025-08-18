@@ -1,10 +1,10 @@
-package com.sorsix.externalapi
+package com.sorsix.webapi
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class UpstreamApiApplicationTests {
+class WebApiApplicationTests {
 
     @Test
     fun contextLoads() {
