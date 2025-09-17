@@ -12,8 +12,8 @@ import org.springframework.boot.runApplication
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -106,7 +106,7 @@ class WebApiController(
         logger.info("Error rate [{}]", rate)
         val external = try {
 //            circuitBreaker.executeCallable {
-                expensiveCallThatCanFail(rate)
+            expensiveCallThatCanFail(rate)
 //            }
         } catch (e: Exception) {
             logger.warn("Error accessing external API [{}]", e.message, e)

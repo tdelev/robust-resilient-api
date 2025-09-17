@@ -13,11 +13,11 @@ class BasicSimulation : Simulation() {
         .userAgentHeader("gatling")
     val API_URL = "/api/web"
 
-//    val scn = scenario("Timeout with 5% chance").exec(
-//        http("timeout")
-//            .get("$API_URL/timeout/5")
-//            .check(status().`is`(200))
-//    )
+    val scn = scenario("Timeout with 5% chance").exec(
+        http("timeout")
+            .get("$API_URL/timeout/5")
+            .check(status().`is`(200))
+    )
 
 //    val scn = scenario("Timeout with DB queries").exec(
 //        http("timeout")
@@ -31,11 +31,23 @@ class BasicSimulation : Simulation() {
 //            .check(status().`is`(200))
 //    )
 
-    val scn = scenario("Fails with error 20% of the time").exec(
-        http("error-rate")
-            .get("$API_URL/error/20")
-            .check(status().`is`(200))
-    )
+//     val scn = scenario("Timeout with DB queries").exec(
+//         http("timeout")
+//             .get("$API_URL/timeout/10/db")
+//             .check(status().`is`(200))
+//     )
+//    val scn = scenario("Front Endpoint Load Test").exec(
+//        http("rate-per-second")
+//            .get("$API_URL/rate/5")
+//            .check(status().`is`(200))
+//    )
+
+
+//    val scn = scenario("Front Endpoint Load Test").exec(
+//        http("error-rate")
+//            .get("$API_URL/error/20")
+//            .check(status().`is`(200))
+//    )
 
     /**
      * Start with 10 concurrent users and increment with rate of 5 users per second for 10 seconds.

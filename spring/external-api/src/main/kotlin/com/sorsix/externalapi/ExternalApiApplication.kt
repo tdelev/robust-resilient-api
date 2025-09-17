@@ -66,9 +66,8 @@ class ExternalApiController {
     fun error(@PathVariable rate: Int): ResponseEntity<String> {
         val errorTime = (rate * 60) / 100
         val second = LocalDateTime.now().second
-        0.0.coerceAtLeast(random.nextGaussian(50.0, 25.0))
         return if (second < errorTime) {
-            Thread.sleep(2000 + (Math.random() * 500).toLong())
+            Thread.sleep(3000 + (Math.random() * 500).toLong())
             logger.warn("Generating error [{}] second", second)
             ResponseEntity.internalServerError().body("error: $second/$errorTime")
         } else {
