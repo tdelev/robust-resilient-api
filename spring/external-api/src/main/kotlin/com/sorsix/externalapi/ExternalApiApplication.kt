@@ -50,7 +50,7 @@ class ExternalApiController {
     fun rateLimit(@PathVariable rate: Int): String {
         val result = executor.submit(
             Callable {
-                Thread.sleep(1000 / rate.toLong())
+                Thread.sleep((1000.0 / rate).toLong())
                 logger.info("Executing request with rate [{}]r/s", rate)
                 Math.random()
             }

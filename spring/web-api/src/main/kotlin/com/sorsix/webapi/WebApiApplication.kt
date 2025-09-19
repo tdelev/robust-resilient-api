@@ -4,6 +4,8 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
 import io.github.resilience4j.ratelimiter.RateLimiterConfig
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry
+import io.github.resilience4j.retry.RetryConfig
+import io.github.resilience4j.retry.RetryRegistry
 import jakarta.persistence.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -48,15 +50,17 @@ class WebApiController(
     val EXTERNAL_API_URL = "http://localhost:8081/api/external"
 
     @GetMapping("/timeout/{probability}")
-    fun timeout(@PathVariable probability: Int): Map<String, Any> {
+    fun timeout(@PathVariable probability: Int): ResponseEntity<Map<String, Any>> {
         logger.info("Timeout [{}]", probability)
         val external = try {
             restTemplate.getForObject<String>("$EXTERNAL_API_URL/timeout/$probability")
         } catch (e: Exception) {
             logger.warn("Error accessing external API [{}]", e.message, e)
-            "timeout"
+            return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(
+                mapOf("time" to LocalDateTime.now(), "external" to "timeout")
+            )
         }
-        return mapOf("time" to LocalDateTime.now(), "external" to external)
+        return ResponseEntity.ok(mapOf("time" to LocalDateTime.now(), "external" to external))
     }
 
     @GetMapping("/rate-limit/{rate}")
@@ -105,9 +109,9 @@ class WebApiController(
     fun errorRate(@PathVariable rate: Int): ResponseEntity<*> {
         logger.info("Error rate [{}]", rate)
         val external = try {
-//            circuitBreaker.executeCallable {
-            expensiveCallThatCanFail(rate)
-//            }
+            circuitBreaker.executeCallable {
+                retryOnFail(rate, 1)
+            }
         } catch (e: Exception) {
             logger.warn("Error accessing external API [{}]", e.message, e)
             return ResponseEntity.internalServerError().body("external-error: ${e.message}")
@@ -146,9 +150,16 @@ class WebApiController(
 
     val circuitBreaker = circuitBreakerRegistry.circuitBreaker("circuit_breaker")
 
-    private fun expensiveCallThatCanFail(rate: Int): String {
-        matrixMultiply(500)
-        return restTemplate.getForObject<String>("$EXTERNAL_API_URL/error/$rate")
+    private fun retryOnFail(rate: Int, count: Int): String = try {
+        restTemplate.getForObject<String>("$EXTERNAL_API_URL/error/$rate")
+    } catch (e: Exception) {
+        logger.info("Retrying attempt [{}]", count)
+        if (count <= 3) {
+            Thread.sleep((500 * count).toLong())
+            retryOnFail(rate, count + 1)
+        } else {
+            throw e
+        }
     }
 
     // CPU-intensive matrix multiplication

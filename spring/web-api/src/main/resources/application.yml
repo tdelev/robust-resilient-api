@@ -3,7 +3,7 @@ spring:
     name: web-api
   threads:
     virtual:
-      enabled: true
+      enabled: false
   datasource:
     url: jdbc:postgresql://localhost:5432/dogs
     username: dogs
